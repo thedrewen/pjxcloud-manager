@@ -251,14 +251,13 @@ export class StatusService {
         });
 
         const container = new ContainerBuilder()
-            .setAccentColor(0x0000ed)
-            .addTextDisplayComponents((text) => text.setContent('# Status of Protojx services'+(live ? ' (live)' : '')));
+            .setAccentColor(0xad55ff)
+            .addTextDisplayComponents((text) => text.setContent('# Status of Pjxcloud services'+(live ? ' (live)' : '')));
 
-        const sections: { title: string, type: InfraType, thumbnail: string }[] = [
+        const sections: { title: string, type: InfraType, thumbnail?: string }[] = [
             {
                 title: 'Websites',
-                type: 'website',
-                thumbnail: 'https://protojx.com/assets/img/home2/agent.png'
+                type: 'website'
             },
             {
                 title: 'Ryzens',
@@ -272,8 +271,7 @@ export class StatusService {
             },
             {
                 title: 'Games',
-                type: 'games',
-                thumbnail: 'https://protojx.com/assets/img/hero-img.png'
+                type: 'games'
             },
             {
                 title: 'Routers',
@@ -285,15 +283,21 @@ export class StatusService {
         sections.map((sectionData) => {
             container.addSeparatorComponents((s) => s)
             container.addSectionComponents(
-                (section) =>
+                (section) => {
                     section.addTextDisplayComponents(
                         (text) =>
                             text.setContent('## ' + sectionData.title + '\n' + hostTexts.filter((v) => v.type == sectionData.type).map((v) => v.value).join('\n'))
                     )
-                    .setThumbnailAccessory(
+
+                    if (sectionData.thumbnail) {
+                        section.setThumbnailAccessory(
                         (acc) =>
-                            acc.setURL(sectionData.thumbnail)
-                    )
+                            acc.setURL(sectionData.thumbnail ?? '')
+                        )
+                    }
+                    return section;
+                }
+                    
             )
         });
 

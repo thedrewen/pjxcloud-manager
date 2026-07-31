@@ -29,7 +29,7 @@ const cmd: CommandDefinition = {
             const img = await statusService.getStatusImageBar(realHost.id);
 
             const container = new ContainerBuilder()
-                .setAccentColor(0x0000ed)
+                .setAccentColor(0xad55ff)
                 .addTextDisplayComponents((t) => t
                     .setContent(`##  ${realHost.alive ? `${process.env.EMOJI_STATUS_ONLINE}` : `${process.env.EMOJI_STATUS_OFFLINE}`} ${realHost.name}\nService status over 7 days :`)
                 )

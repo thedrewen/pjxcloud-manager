@@ -1,3 +1,5 @@
+import './deploy-commands';
+
 import { Client, Collection, Events, GatewayIntentBits, MessageFlags } from "discord.js";
 import { configDotenv } from "dotenv";
 import path from "path";
