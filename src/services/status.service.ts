@@ -1,6 +1,6 @@
 import ping from "ping";
 import * as cron from 'cron';
-import { ActivityType, Client, ContainerBuilder, MessageFlags, ThumbnailBuilder } from "discord.js";
+import { ActivityType, Client, ContainerBuilder, MessageFlags } from "discord.js";
 import { InfraType } from "../type";
 import { AppDataSource } from "../data-source";
 import { HostsLog } from "../entity/hostslog.entity";
@@ -11,7 +11,7 @@ import dayjs, { Dayjs } from "dayjs";
 import { Canvas } from "canvas";
 import { Service } from "../entity/service.entity";
 
-type Nofity = {time: Date, name : string, alive : boolean, type : string, host: Service};
+type Nofity = { time: Date, name: string, alive: boolean, type: string, host: Service };
 
 export class StatusService {
 
@@ -43,7 +43,7 @@ export class StatusService {
                 .from(HostsLog)
                 .where("created_at < :date", { date: oneMonthAgo })
                 .execute();
-            
+
             // ? Get status
             try {
                 await this.fetch();
@@ -51,22 +51,22 @@ export class StatusService {
 
                 // ? Message Live 
                 const guilds = await this.guildRepo.find();
-            
+
                 guilds.forEach(async (gdb) => {
-                    if(this.client) {
+                    if (this.client) {
                         try {
                             const guild = await this.client.guilds.fetch(gdb.guild_id);
                             const channel = await guild.channels.fetch(gdb.persistent_message_channel_id);
-                            if(channel?.isSendable())  {
+                            if (channel?.isSendable()) {
                                 const message = await channel.messages.fetch(gdb.persistent_message_id);
-                                await message.edit({components: [await this.getUpdatedContainer(true)]});
+                                await message.edit({ components: [await this.getUpdatedContainer(true)] });
                             }
                         } catch (error) {
-                            console.log(error + ' GuildIdInDB : '+gdb.id); 
+                            console.log(error + ' GuildIdInDB : ' + gdb.id);
                         }
                     }
                 });
-                
+
                 console.log('Status check completed at:', new Date().toISOString());
             } catch (error) {
                 console.error('Error during status check:', error);
@@ -84,9 +84,9 @@ export class StatusService {
     public async getStatusImageBar(serviceId: number) {
 
         const datas = await this.hostsLogRepo.createQueryBuilder()
-            .where('HostsLog.serviceId = :serviceId AND HostsLog.created_at > :date ORDER BY HostsLog.created_at ASC', {serviceId, date: dayjs().subtract(1, 'week').toDate()}).getMany();
-        
-        const uptimes : { up: boolean, date: Dayjs }[] = datas.map((log) => {
+            .where('HostsLog.serviceId = :serviceId AND HostsLog.created_at > :date ORDER BY HostsLog.created_at ASC', { serviceId, date: dayjs().subtract(1, 'week').toDate() }).getMany();
+
+        const uptimes: { up: boolean, date: Dayjs }[] = datas.map((log) => {
             return {
                 up: log.status,
                 date: dayjs(log.created_at)
@@ -122,13 +122,13 @@ export class StatusService {
             } else {
                 if (!element.up) {
                     minTime = percent;
-                    
-                    if(minTime != null && index == uptimes.length - 1) {
+
+                    if (minTime != null && index == uptimes.length - 1) {
                         ranges.push({
                             min: minTime,
                             max: 100
                         });
-                    } 
+                    }
                 } else {
                     if (minTime) {
                         ranges.push({
@@ -161,7 +161,7 @@ export class StatusService {
         }
     }
 
-    private async fetchAlive(service: Service, notifs : Nofity[]) {
+    private async fetchAlive(service: Service, notifs: Nofity[]) {
 
         const latestLog = await this.hostsLogRepo.findOne({ where: { service }, order: { created_at: 'DESC' } });
 
@@ -186,8 +186,8 @@ export class StatusService {
 
             this.hostsLogRepo.save(log);
 
-            if(latestLog && service.notify) {
-                notifs.push({alive: service.alive, name: service.name, time: new Date(), type: service.type, host: service});
+            if (latestLog && service.notify) {
+                notifs.push({ alive: service.alive, name: service.name, time: new Date(), type: service.type, host: service });
             }
         }
 
@@ -196,7 +196,7 @@ export class StatusService {
         return service;
     }
 
-    private async fetch(max = 1, notifs : Nofity[] = []) {
+    private async fetch(max = 1, notifs: Nofity[] = []) {
 
         const max_ping = 3;
 
@@ -215,46 +215,46 @@ export class StatusService {
 
         if (services.length > max * max_ping) {
             await this.fetch(max + 1, notifs);
-        }else if(notifs.length > 0){
+        } else if (notifs.length > 0) {
             // ? Notification System (part 2 !):
             const container = new ContainerBuilder()
                 .addTextDisplayComponents((t) => t.setContent(`### 🔔 Status change alert`));
-            
+
             notifs.map(async (n) => {
-                container.addSeparatorComponents((s)=>s);
-                container.addTextDisplayComponents((text) => text.setContent(`${n.alive ? process.env.EMOJI_STATUS_ONLINE : process.env.EMOJI_STATUS_OFFLINE} **${n.name}** is now **${n.alive ? 'online' : 'offline'}**\n🏷️ Type : ${n.type}\n🕒 Time : <t:${Math.round(new Date().getTime()/1000)}:R>`));
+                container.addSeparatorComponents((s) => s);
+                container.addTextDisplayComponents((text) => text.setContent(`${n.alive ? process.env.EMOJI_STATUS_ONLINE : process.env.EMOJI_STATUS_OFFLINE} **${n.name}** is now **${n.alive ? 'online' : 'offline'}**\n🏷️ Type : ${n.type}\n🕒 Time : <t:${Math.round(new Date().getTime() / 1000)}:R>`));
             });
 
-            const users = await this.followRepo.find({where: {enable: true}});
+            const users = await this.followRepo.find({ where: { enable: true } });
             const hosts = notifs.map((n) => n.host);
-            const users_ids : string[] = [];
+            const users_ids: string[] = [];
             console.log("Sending notifs...")
             users.filter(v => hosts.map((h) => h.id).includes(v.serviceId)).forEach(async (user) => {
-                if(!users_ids.includes(user.user_discord)) {
+                if (!users_ids.includes(user.user_discord)) {
                     users_ids.push(user.user_discord)
                     try {
                         const userdc = await this.client?.users.fetch(user.user_discord);
-                        if(userdc) {
-                            userdc.send({components: [container], flags: [MessageFlags.IsComponentsV2]})
+                        if (userdc) {
+                            userdc.send({ components: [container], flags: [MessageFlags.IsComponentsV2] })
                         }
-                    } catch (error) {}
+                    } catch (error) { }
                 }
             });
         }
     }
 
-    public async getUpdatedContainer(live : boolean = false): Promise<ContainerBuilder> {
-        const services = await this.serviceRepo.find({order: {id: 'ASC'}});
-        
+    public async getUpdatedContainer(live: boolean = false): Promise<ContainerBuilder> {
+        const services = await this.serviceRepo.find({ order: { id: 'ASC' } });
+
         const hostTexts = services.map((s) => {
             return { type: s.type, value: `- ${s.name} : ${s.alive ? `${process.env.EMOJI_STATUS_ONLINE} Online` : `${process.env.EMOJI_STATUS_OFFLINE} Offline`}` };
         });
 
         const container = new ContainerBuilder()
             .setAccentColor(0xad55ff)
-            .addTextDisplayComponents((text) => text.setContent('# Status of Pjxcloud services'+(live ? ' (live)' : '')));
+            .addTextDisplayComponents((text) => text.setContent('# Status of Pjxcloud services' + (live ? ' (live)' : '')));
 
-        const sections: { title: string, type: InfraType, thumbnail?: string }[] = [
+        const sections: { title: string, type: InfraType }[] = [
             {
                 title: 'Websites',
                 type: 'website',
@@ -262,21 +262,18 @@ export class StatusService {
             {
                 title: 'Ryzens',
                 type: 'ryzen',
-                thumbnail: 'https://iconape.com/wp-content/png_logo_vector/ryzen.png'
             },
             {
                 title: 'Xeons',
                 type: 'xeon',
-                thumbnail: 'https://upload.wikimedia.org/wikipedia/commons/3/31/Intel-Xeon-Badge-2024.jpg'
             },
             {
                 title: 'Games',
-                type: 'games'
+                type: 'games',
             },
             {
                 title: 'Routers',
                 type: 'router',
-                thumbnail: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRMnCmtQRkLlcD1Cb6vKXz6NOxAu79vzmq2pRqpNYxpTJa5JQEsouhqnVn7cyl6ivYSyzY&usqp=CAU'
             }
         ]
 
@@ -288,14 +285,9 @@ export class StatusService {
                         (text) =>
                             text.setContent('## ' + sectionData.title + '\n' + hostTexts.filter((v) => v.type == sectionData.type).map((v) => v.value).join('\n'))
                     )
-                    if (sectionData.thumbnail) {
-                        section.setThumbnailAccessory(
-                            new ThumbnailBuilder().setURL(sectionData.thumbnail)
-                        )
-                    }
                     return section;
                 }
-                    
+
             )
         });
 
