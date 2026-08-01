@@ -24,19 +24,22 @@
   },
   "homepage": "https://github.com/Under-scape/discordbot-ts-template#readme",
   "devDependencies": {
-    "@types/node": "^24.9.2",
+    "@types/node": "^26.1.2",
     "typescript": "^5.9.2"
   },
   "dependencies": {
     "@types/ping": "^0.4.4",
-    "canvas": "^3.2.0",
-    "cron": "^4.3.3",
-    "dayjs": "^1.11.19",
-    "discord.js": "^14.24.2",
+    "canvas": "^3.2.3",
+    "cron": "^4.4.0",
+    "dayjs": "^1.11.21",
+    "discord.js": "^14.27.0",
     "dotenv": "^17.2.2",
     "pg": "^8.16.3",
     "ping": "^1.0.0",
     "reflect-metadata": "^0.2.2",
-    "typeorm": "^0.3.27"
+    "typeorm": "^1.1.0"
+  },
+  "allowScripts": {
+    "canvas@3.2.3": true
   }
 }

@@ -163,8 +163,8 @@ export class StatusService {
 
     private async fetchAlive(service: Service, notifs: Nofity[]) {
 
-        const latestLog = await this.hostsLogRepo.findOne({ where: { service }, order: { created_at: 'DESC' } });
-
+        const latestLog = await this.hostsLogRepo.findOne({ where: { serviceId: service.id }, order: { created_at: 'DESC' } });
+        
         // ? Ping and Request Hosts
         if (service.ping_type === 'ping') {
             let res = await ping.promise.probe(service.host, { timeout: 10 });
@@ -279,15 +279,9 @@ export class StatusService {
 
         sections.forEach((sectionData) => {
             container.addSeparatorComponents((s) => s)
-            container.addSectionComponents(
-                (section) => {
-                    section.addTextDisplayComponents(
-                        (text) =>
-                            text.setContent('## ' + sectionData.title + '\n' + hostTexts.filter((v) => v.type == sectionData.type).map((v) => v.value).join('\n'))
-                    )
-                    return section;
-                }
-
+            container.addTextDisplayComponents(
+                (text) =>
+                    text.setContent('## ' + sectionData.title + '\n' + hostTexts.filter((v) => v.type == sectionData.type).map((v) => v.value).join('\n'))
             )
         });
 
