@@ -62,6 +62,7 @@ export class StatusService {
                                 await message.edit({ components: [await this.getUpdatedContainer(true)] });
                             }
                         } catch (error) {
+                            this.guildRepo.delete(gdb);
                             console.log(error + ' GuildIdInDB : ' + gdb.id);
                         }
                     }
