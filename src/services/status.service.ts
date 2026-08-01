@@ -1,6 +1,6 @@
 import ping from "ping";
 import * as cron from 'cron';
-import { ActivityType, Client, ContainerBuilder, MessageFlags } from "discord.js";
+import { ActivityType, Client, ContainerBuilder, MessageFlags, ThumbnailBuilder } from "discord.js";
 import { InfraType } from "../type";
 import { AppDataSource } from "../data-source";
 import { HostsLog } from "../entity/hostslog.entity";
@@ -257,7 +257,7 @@ export class StatusService {
         const sections: { title: string, type: InfraType, thumbnail?: string }[] = [
             {
                 title: 'Websites',
-                type: 'website'
+                type: 'website',
             },
             {
                 title: 'Ryzens',
@@ -280,7 +280,7 @@ export class StatusService {
             }
         ]
 
-        sections.map((sectionData) => {
+        sections.forEach((sectionData) => {
             container.addSeparatorComponents((s) => s)
             container.addSectionComponents(
                 (section) => {
@@ -288,11 +288,9 @@ export class StatusService {
                         (text) =>
                             text.setContent('## ' + sectionData.title + '\n' + hostTexts.filter((v) => v.type == sectionData.type).map((v) => v.value).join('\n'))
                     )
-
                     if (sectionData.thumbnail) {
                         section.setThumbnailAccessory(
-                        (acc) =>
-                            acc.setURL(sectionData.thumbnail ?? '')
+                            new ThumbnailBuilder().setURL(sectionData.thumbnail)
                         )
                     }
                     return section;
